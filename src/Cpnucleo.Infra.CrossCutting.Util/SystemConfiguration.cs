@@ -52,51 +52,11 @@ namespace Cpnucleo.Infra.CrossCutting.Util
             }
         }
 
-        public int CookieExpires
-        {
-            get
-            {
-                int.TryParse(_configuration.GetSection("Cookie")["Expires"], out int value);
-
-                return value;
-            }
-        }
-
         public string JwtKey
         {
             get
             {
                 string value = _configuration.GetSection("Jwt")["Key"];
-
-                if (value != null)
-                {
-                    return value;
-                }
-
-                return string.Empty;
-            }
-        }
-
-        public string UrlCpnucleoApi
-        {
-            get
-            {
-                string value = _configuration.GetSection("AppSettings")["UrlCpnucleoApi"];
-
-                if (value != null)
-                {
-                    return value;
-                }
-
-                return string.Empty;
-            }
-        }
-
-        public string UrlCpnucleoGrpc
-        {
-            get
-            {
-                string value = _configuration.GetSection("AppSettings")["UrlCpnucleoGrpc"];
 
                 if (value != null)
                 {

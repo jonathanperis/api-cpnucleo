@@ -21,20 +21,5 @@
         /// JWT token expiration date
         /// </summary>
         int JwtExpires { get; }
-
-        /// <summary>
-        /// Cookie expiration date
-        /// </summary>
-        int CookieExpires { get; }
-
-        /// <summary>
-        /// URL for Cpnucleo API
-        /// </summary>
-        string UrlCpnucleoApi { get; }
-
-        /// <summary>
-        /// URL for Cpnucleo GRPC
-        /// </summary>
-        string UrlCpnucleoGrpc { get; }
     }
 }
