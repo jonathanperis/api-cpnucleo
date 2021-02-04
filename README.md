@@ -1,4 +1,4 @@
-# Cpnucleo API
+# API Cpnucleo
 A sample application that implements the best praticles when building a .NET 5 Web API project
 
 If you're looking for clients that implements this API, please look to https://github.com/jonathanperis/cpnucleo-pages
