@@ -17,12 +17,5 @@ namespace Cpnucleo.Infra.CrossCutting.IoC
 
             return services;
         }
-
-        public static IServiceCollection AddCpnucleoSetup(this IServiceCollection services)
-        {
-            services.AddInfraCrossCuttingUtilSetup();
-
-            return services;
-        }
     }
 }
