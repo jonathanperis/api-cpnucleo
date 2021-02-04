@@ -23,7 +23,7 @@ namespace Cpnucleo.API.Controllers.V2
         }
 
         /// <summary>
-        /// Listar apontamentos - ZAION 2
+        /// Listar apontamentos
         /// </summary>
         /// <remarks>
         /// # Listar apontamentos
