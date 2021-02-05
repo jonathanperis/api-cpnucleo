@@ -11,7 +11,6 @@ namespace Cpnucleo.Infra.Data.Configuration
     {
         public static void AddInfraDataSetup(this IServiceCollection services)
         {
-            // Infra - Data
             services
                 .AddScoped<ICrudRepository<Sistema>, CrudRepository<Sistema>>()
                 .AddScoped<ICrudRepository<Projeto>, CrudRepository<Projeto>>()
