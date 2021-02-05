@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Cpnucleo.Infra.Data.Repository
+namespace Cpnucleo.Infra.Data.Repositories
 {
     internal class RecursoProjetoRepository : CrudRepository<RecursoProjeto>, IRecursoProjetoRepository
     {

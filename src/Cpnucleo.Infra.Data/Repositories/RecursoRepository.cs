@@ -4,7 +4,7 @@ using Cpnucleo.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
-namespace Cpnucleo.Infra.Data.Repository
+namespace Cpnucleo.Infra.Data.Repositories
 {
     internal class RecursoRepository : CrudRepository<Recurso>, IRecursoRepository
     {

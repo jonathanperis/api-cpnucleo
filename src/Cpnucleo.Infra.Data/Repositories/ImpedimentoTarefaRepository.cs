@@ -6,20 +6,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Cpnucleo.Infra.Data.Repository
+namespace Cpnucleo.Infra.Data.Repositories
 {
-    internal class RecursoTarefaRepository : CrudRepository<RecursoTarefa>, IRecursoTarefaRepository
+    internal class ImpedimentoTarefaRepository : CrudRepository<ImpedimentoTarefa>, IImpedimentoTarefaRepository
     {
-        public RecursoTarefaRepository(CpnucleoContext context)
+        public ImpedimentoTarefaRepository(CpnucleoContext context)
             : base(context)
         {
 
         }
 
-        public IEnumerable<RecursoTarefa> ListarPorTarefa(Guid idTarefa)
+        public IEnumerable<ImpedimentoTarefa> ListarPorTarefa(Guid idTarefa)
         {
             return Listar()
-                .Include(_context.GetIncludePaths(typeof(RecursoTarefa)))
+                .Include(_context.GetIncludePaths(typeof(ImpedimentoTarefa)))
                 .Where(x => x.IdTarefa == idTarefa)
                 .ToList();
         }

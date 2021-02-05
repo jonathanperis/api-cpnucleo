@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
-namespace Cpnucleo.Infra.Data.Repository
+namespace Cpnucleo.Infra.Data.Repositories
 {
     internal class CrudRepository<TEntity> : ICrudRepository<TEntity> where TEntity : BaseEntity
     {

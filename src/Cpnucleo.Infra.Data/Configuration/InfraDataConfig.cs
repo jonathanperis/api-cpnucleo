@@ -1,7 +1,7 @@
 ﻿using Cpnucleo.Domain.Entities;
 using Cpnucleo.Domain.Interfaces.Repositories;
 using Cpnucleo.Infra.Data.Context;
-using Cpnucleo.Infra.Data.Repository;
+using Cpnucleo.Infra.Data.Repositories;
 using Cpnucleo.Infra.Data.UoW;
 using Microsoft.Extensions.DependencyInjection;
 
