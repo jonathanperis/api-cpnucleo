@@ -7,14 +7,14 @@ namespace Cpnucleo.Domain.Repositories
     {
         TEntity Add(TEntity entity);
 
-        TEntity Update(TEntity entity);
+        bool Update(TEntity entity);
         
         TEntity Get(Guid id);
 
         IEnumerable<TEntity> All(bool getDependencies = false);
 
-        void Remove(Guid id);
+        bool Remove(Guid id);
 
-        void SaveChanges();
+        bool SaveChanges();
     }
 }

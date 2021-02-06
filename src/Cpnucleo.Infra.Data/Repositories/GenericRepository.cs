@@ -34,15 +34,13 @@ namespace Cpnucleo.Infra.Data.Repositories
             return entity;
         }
 
-        public virtual TEntity Update(TEntity entity)
+        public virtual bool Update(TEntity entity)
         {
             entity.DataAlteracao = DateTime.Now;
 
             entity = _context.Update(entity).Entity;
 
-            SaveChanges();
-
-            return entity;
+            return SaveChanges();
         }
 
         public virtual TEntity Get(Guid id)
@@ -66,19 +64,19 @@ namespace Cpnucleo.Infra.Data.Repositories
                 .Where(x => x.Ativo);            
         }
 
-        public void Remove(Guid id)
+        public bool Remove(Guid id)
         {
             TEntity entity = Get(id);
 
             entity.Ativo = false;
             entity.DataExclusao = DateTime.Now;
 
-            Update(entity);            
+            return Update(entity);            
         }
 
-        public void SaveChanges()
+        public bool SaveChanges()
         {
-            _context.SaveChanges();
+            return _context.SaveChanges() > 0;
         }
 
         public void Dispose()
