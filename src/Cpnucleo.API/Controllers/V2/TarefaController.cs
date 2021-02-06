@@ -231,7 +231,7 @@ namespace Cpnucleo.API.Controllers.V2
         ///     }
         /// </remarks>
         /// <param name="idTarefa">Id da tarefa</param>        
-        /// <param name="idWorkflow">Id do workflow</param>        
+        /// <param name="obj">Workflow</param>        
         /// <response code="204">Tarefa alterada com sucesso</response>
         /// <response code="400">ID informado não é válido</response>
         /// <response code="401">Acesso não autorizado</response>
@@ -239,7 +239,7 @@ namespace Cpnucleo.API.Controllers.V2
         [HttpPut("PutByWorkflow/{idTarefa}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult PutByWorkflow(Guid idTarefa, [FromBody]Guid idWorkflow)
+        public IActionResult PutByWorkflow(Guid idTarefa, [FromBody]Workflow obj)
         {
             if (!ModelState.IsValid)
             {
@@ -249,10 +249,9 @@ namespace Cpnucleo.API.Controllers.V2
             try
             {
                 Tarefa tarefa = _unitOfWork.TarefaRepository.Get(idTarefa);
-                Workflow workflow = _unitOfWork.WorkflowRepository.Get(idWorkflow);
 
-                tarefa.IdWorkflow = idWorkflow;
-                tarefa.Workflow = workflow;
+                tarefa.IdWorkflow = obj.Id;
+                tarefa.Workflow = obj;
 
                 _unitOfWork.TarefaRepository.Update(tarefa);
             }

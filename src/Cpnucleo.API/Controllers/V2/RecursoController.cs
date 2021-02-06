@@ -143,19 +143,19 @@ namespace Cpnucleo.API.Controllers.V2
         }
 
         /// <summary>
-        /// Autenticar recurso
+        /// Autenticar
         /// </summary>
         /// <remarks>
-        /// # Autenticar recurso
+        /// # Autenticar
         /// 
-        /// Autentica o recurso e devolve um token válido por 60 minutos para utilização na API.
+        /// Autentica e devolve um token válido por 60 minutos para utilização na API.
         /// 
         /// # Sample request:
         ///
         ///     POST /recurso/autenticar
         ///     {
         ///        "login": "usuario.teste",
-        ///        "senha": "12345678",
+        ///        "senha": "12345678"
         ///     }
         /// </remarks>
         /// <param name="obj">Recurso</param>
