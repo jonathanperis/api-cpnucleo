@@ -118,7 +118,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetSistema", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetSistema", new { id = obj.Id }, obj);
         }
 
         /// <summary>

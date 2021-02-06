@@ -131,7 +131,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetWorkflow", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetWorkflow", new { id = obj.Id }, obj);
         }
 
         /// <summary>

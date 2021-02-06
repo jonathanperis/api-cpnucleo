@@ -138,7 +138,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetRecursoTarefa", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetRecursoTarefa", new { id = obj.Id }, obj);
         }
 
         /// <summary>

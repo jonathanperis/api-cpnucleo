@@ -118,7 +118,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetTipoTarefa", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetTipoTarefa", new { id = obj.Id }, obj);
         }
 
         /// <summary>

@@ -120,7 +120,7 @@ namespace Cpnucleo.API.Controllers.V1
                 }
             }
 
-            return CreatedAtAction(nameof(Get), new { id = obj.Id }, obj);
+            return CreatedAtRoute(nameof(Get), new { id = obj.Id }, obj);
         }
 
         /// <summary>

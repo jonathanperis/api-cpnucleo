@@ -141,7 +141,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetApontamento", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetApontamento", new { id = obj.Id }, obj);
         }
 
         /// <summary>

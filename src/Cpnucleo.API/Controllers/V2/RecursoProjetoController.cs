@@ -137,7 +137,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetRecursoProjeto", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetRecursoProjeto", new { id = obj.Id }, obj);
         }
 
         /// <summary>

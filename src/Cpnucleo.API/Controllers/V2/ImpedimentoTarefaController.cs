@@ -138,7 +138,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetImpedimentoTarefa", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetImpedimentoTarefa", new { id = obj.Id }, obj);
         }
 
         /// <summary>

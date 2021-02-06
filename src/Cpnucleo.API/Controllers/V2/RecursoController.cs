@@ -139,7 +139,7 @@ namespace Cpnucleo.API.Controllers.V2
                 }
             }
 
-            return CreatedAtAction("GetRecurso", new { id = obj.Id }, obj);
+            return CreatedAtRoute("GetRecurso", new { id = obj.Id }, obj);
         }
 
         /// <summary>
