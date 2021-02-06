@@ -6,6 +6,6 @@ namespace Cpnucleo.Domain.Repositories
 {
     public interface IRecursoTarefaRepository : IGenericRepository<RecursoTarefa>
     {
-        IEnumerable<RecursoTarefa> ListarPorTarefa(Guid idTarefa);
+        IEnumerable<RecursoTarefa> GetByTarefa(Guid idTarefa);
     }
 }

@@ -16,7 +16,7 @@ namespace Cpnucleo.Infra.Data.Repositories
 
         }
 
-        public IEnumerable<RecursoTarefa> ListarPorTarefa(Guid idTarefa)
+        public IEnumerable<RecursoTarefa> GetByTarefa(Guid idTarefa)
         {
             return All(true)
                 .Where(x => x.IdTarefa == idTarefa)

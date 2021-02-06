@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<RecursoTarefa> GetByTarefa(Guid idTarefa)
         {
-            return _unitOfWork.RecursoTarefaRepository.ListarPorTarefa(idTarefa);
+            return _unitOfWork.RecursoTarefaRepository.GetByTarefa(idTarefa);
         }
 
         /// <summary>
