@@ -1,10 +1,11 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
+using System.Linq;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +16,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class TarefaController : ControllerBase
     {
-        private readonly ITarefaService _tarefaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TarefaController(ITarefaService tarefaService)
+        public TarefaController(IUnitOfWork unitOfWork)
         {
-            _tarefaService = tarefaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +39,9 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<Tarefa> Get(bool getDependencies = false)
         {
-            return _tarefaService.Listar(getDependencies);
+            var result = _unitOfWork.TarefaRepository.All(getDependencies);
+
+            return PreencherDadosAdicionais(result);
         }
 
         /// <summary>
@@ -59,7 +62,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Tarefa> Get(Guid id)
         {
-            Tarefa tarefa = _tarefaService.Consultar(id);
+            Tarefa tarefa = _unitOfWork.TarefaRepository.Get(id);
 
             if (tarefa == null)
             {
@@ -85,7 +88,9 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<Tarefa> GetByRecurso(Guid id)
         {
-            return _tarefaService.ListarPorRecurso(id);
+            var result = _unitOfWork.TarefaRepository.GetByRecurso(id);
+
+            return PreencherDadosAdicionais(result);
         }
 
         /// <summary>
@@ -129,7 +134,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _tarefaService.Incluir(obj);
+                obj = _unitOfWork.TarefaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -193,7 +198,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _tarefaService.Alterar(obj);
+                _unitOfWork.TarefaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -243,7 +248,13 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _tarefaService.AlterarPorWorkflow(idTarefa, idWorkflow);
+                Tarefa tarefa = _unitOfWork.TarefaRepository.Get(idTarefa);
+                Workflow workflow = _unitOfWork.WorkflowRepository.Get(idWorkflow);
+
+                tarefa.IdWorkflow = idWorkflow;
+                tarefa.Workflow = workflow;
+
+                _unitOfWork.TarefaRepository.Update(tarefa);
             }
             catch (Exception)
             {
@@ -278,21 +289,53 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            Tarefa obj = _tarefaService.Consultar(id);
+            Tarefa obj = _unitOfWork.TarefaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _tarefaService.Remover(id);
+            _unitOfWork.TarefaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _tarefaService.Consultar(id) != null;
+            return _unitOfWork.TarefaRepository.Get(id) != null;
         }
+
+        private IEnumerable<Tarefa> PreencherDadosAdicionais(IEnumerable<Tarefa> lista)
+        {
+            int colunas = _unitOfWork.WorkflowRepository.GetQuantidadeColunas();
+
+            foreach (Tarefa item in lista)
+            {
+                item.Workflow.TamanhoColuna = _unitOfWork.WorkflowRepository.GetTamanhoColuna(colunas);
+                
+                item.HorasConsumidas = _unitOfWork.ApontamentoRepository.GetTotalHorasPorRecurso(item.IdRecurso, item.Id);
+                item.HorasRestantes = item.QtdHoras - item.HorasConsumidas;
+
+                if (_unitOfWork.ImpedimentoTarefaRepository.GetByTarefa(item.Id).Count() > 0)
+                {
+                    item.TipoTarefa.Element = "warning-element";
+                }
+                else if (DateTime.Now.Date >= item.DataInicio && DateTime.Now.Date <= item.DataTermino)
+                {
+                    item.TipoTarefa.Element = "success-element";
+                }
+                else if (DateTime.Now.Date > item.DataTermino)
+                {
+                    item.TipoTarefa.Element = "danger-element";
+                }
+                else
+                {
+                    item.TipoTarefa.Element = "info-element";
+                }
+            }
+
+            return lista;
+        }        
     }
 }

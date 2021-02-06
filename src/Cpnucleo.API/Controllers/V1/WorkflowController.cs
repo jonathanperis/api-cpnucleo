@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class WorkflowController : ControllerBase
     {
-        private readonly ICrudService<Workflow> _workflowService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public WorkflowController(ICrudService<Workflow> workflowService)
+        public WorkflowController(IUnitOfWork unitOfWork)
         {
-            _workflowService = workflowService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<Workflow> Get()
         {
-            return _workflowService.Listar();
+            return _unitOfWork.WorkflowRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<Workflow> Get(Guid id)
         {
-            Workflow workflow = _workflowService.Consultar(id);
+            Workflow workflow = _unitOfWork.WorkflowRepository.Get(id);
 
             if (workflow == null)
             {
@@ -102,7 +102,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _workflowService.Incluir(obj);
+                _unitOfWork.WorkflowRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -160,7 +160,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _workflowService.Alterar(obj);
+                _unitOfWork.WorkflowRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -195,21 +195,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            Workflow obj = _workflowService.Consultar(id);
+            Workflow obj = _unitOfWork.WorkflowRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _workflowService.Remover(id);
+            _unitOfWork.WorkflowRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _workflowService.Consultar(id) != null;
+            return _unitOfWork.WorkflowRepository.Get(id) != null;
         }
     }
 }

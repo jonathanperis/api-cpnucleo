@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class RecursoController : ControllerBase
     {
-        private readonly IRecursoService _recursoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public RecursoController(IRecursoService recursoService)
+        public RecursoController(IUnitOfWork unitOfWork)
         {
-            _recursoService = recursoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<Recurso> Get()
         {
-            return _recursoService.Listar();
+            return _unitOfWork.RecursoRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<Recurso> Get(Guid id)
         {
-            Recurso recurso = _recursoService.Consultar(id);
+            Recurso recurso = _unitOfWork.RecursoRepository.Get(id);
 
             if (recurso == null)
             {
@@ -104,7 +104,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _recursoService.Incluir(obj);
+                _unitOfWork.RecursoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -164,7 +164,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _recursoService.Alterar(obj);
+                _unitOfWork.RecursoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -199,21 +199,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            Recurso obj = _recursoService.Consultar(id);
+            Recurso obj = _unitOfWork.RecursoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _recursoService.Remover(id);
+            _unitOfWork.RecursoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _recursoService.Consultar(id) != null;
+            return _unitOfWork.RecursoRepository.Get(id) != null;
         }
     }
 }

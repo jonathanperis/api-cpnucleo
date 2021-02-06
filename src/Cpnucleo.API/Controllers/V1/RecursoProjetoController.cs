@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class RecursoProjetoController : ControllerBase
     {
-        private readonly IRecursoProjetoService _recursoProjetoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public RecursoProjetoController(IRecursoProjetoService recursoProjetoService)
+        public RecursoProjetoController(IUnitOfWork unitOfWork)
         {
-            _recursoProjetoService = recursoProjetoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<RecursoProjeto> Get()
         {
-            return _recursoProjetoService.Listar();
+            return _unitOfWork.RecursoProjetoRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<RecursoProjeto> Get(Guid id)
         {
-            RecursoProjeto recursoProjeto = _recursoProjetoService.Consultar(id);
+            RecursoProjeto recursoProjeto = _unitOfWork.RecursoProjetoRepository.Get(id);
 
             if (recursoProjeto == null)
             {
@@ -102,7 +102,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _recursoProjetoService.Incluir(obj);
+                _unitOfWork.RecursoProjetoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -160,7 +160,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _recursoProjetoService.Alterar(obj);
+                _unitOfWork.RecursoProjetoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -195,21 +195,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            RecursoProjeto obj = _recursoProjetoService.Consultar(id);
+            RecursoProjeto obj = _unitOfWork.RecursoProjetoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _recursoProjetoService.Remover(id);
+            _unitOfWork.RecursoProjetoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _recursoProjetoService.Consultar(id) != null;
+            return _unitOfWork.RecursoProjetoRepository.Get(id) != null;
         }
     }
 }

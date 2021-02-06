@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class ImpedimentoTarefaController : ControllerBase
     {
-        private readonly IImpedimentoTarefaService _impedimentoTarefaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ImpedimentoTarefaController(IImpedimentoTarefaService impedimentoTarefaService)
+        public ImpedimentoTarefaController(IUnitOfWork unitOfWork)
         {
-            _impedimentoTarefaService = impedimentoTarefaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<ImpedimentoTarefa> Get()
         {
-            return _impedimentoTarefaService.Listar();
+            return _unitOfWork.ImpedimentoTarefaRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<ImpedimentoTarefa> Get(Guid id)
         {
-            ImpedimentoTarefa impedimentoTarefa = _impedimentoTarefaService.Consultar(id);
+            ImpedimentoTarefa impedimentoTarefa = _unitOfWork.ImpedimentoTarefaRepository.Get(id);
 
             if (impedimentoTarefa == null)
             {
@@ -103,7 +103,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _impedimentoTarefaService.Incluir(obj);
+                _unitOfWork.ImpedimentoTarefaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -162,7 +162,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _impedimentoTarefaService.Alterar(obj);
+                _unitOfWork.ImpedimentoTarefaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -197,21 +197,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            ImpedimentoTarefa obj = _impedimentoTarefaService.Consultar(id);
+            ImpedimentoTarefa obj = _unitOfWork.ImpedimentoTarefaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _impedimentoTarefaService.Remover(id);
+            _unitOfWork.ImpedimentoTarefaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _impedimentoTarefaService.Consultar(id) != null;
+            return _unitOfWork.ImpedimentoTarefaRepository.Get(id) != null;
         }
     }
 }

@@ -2,9 +2,9 @@ using Cpnucleo.Domain.Entities;
 using System;
 using System.Collections.Generic;
 
-namespace Cpnucleo.Domain.Interfaces.Repositories
+namespace Cpnucleo.Domain.Repositories
 {
-    public interface IRecursoTarefaRepository : ICrudRepository<RecursoTarefa>
+    public interface IRecursoTarefaRepository : IGenericRepository<RecursoTarefa>
     {
         IEnumerable<RecursoTarefa> ListarPorTarefa(Guid idTarefa);
     }

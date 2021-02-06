@@ -1,10 +1,10 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +15,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class ApontamentoController : ControllerBase
     {
-        private readonly IApontamentoService _apontamentoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ApontamentoController(IApontamentoService apontamentoService)
+        public ApontamentoController(IUnitOfWork unitOfWork)
         {
-            _apontamentoService = apontamentoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<Apontamento> Get(bool getDependencies = false)
         {
-            return _apontamentoService.Listar(getDependencies);
+            return _unitOfWork.ApontamentoRepository.All(getDependencies);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<Apontamento> GetByRecurso(Guid idRecurso)
         {
-            return _apontamentoService.ListarPorRecurso(idRecurso);
+            return _unitOfWork.ApontamentoRepository.GetByRecurso(idRecurso);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Apontamento> Get(Guid id)
         {
-            Apontamento apontamento = _apontamentoService.Consultar(id);
+            Apontamento apontamento = _unitOfWork.ApontamentoRepository.Get(id);
 
             if (apontamento == null)
             {
@@ -127,7 +127,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _apontamentoService.Incluir(obj);
+                obj = _unitOfWork.ApontamentoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -191,7 +191,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _apontamentoService.Alterar(obj);
+                _unitOfWork.ApontamentoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -226,21 +226,21 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            Apontamento obj = _apontamentoService.Consultar(id);
+            Apontamento obj = _unitOfWork.ApontamentoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _apontamentoService.Remover(id);
+            _unitOfWork.ApontamentoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _apontamentoService.Consultar(id) != null;
+            return _unitOfWork.ApontamentoRepository.Get(id) != null;
         }
     }
 }

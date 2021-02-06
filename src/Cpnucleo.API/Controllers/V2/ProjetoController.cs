@@ -1,10 +1,10 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +15,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class ProjetoController : ControllerBase
     {
-        private readonly ICrudService<Projeto> _projetoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProjetoController(ICrudService<Projeto> projetoService)
+        public ProjetoController(IUnitOfWork unitOfWork)
         {
-            _projetoService = projetoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<Projeto> Get(bool getDependencies = false)
         {
-            return _projetoService.Listar(getDependencies);
+            return _unitOfWork.ProjetoRepository.All(getDependencies);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Projeto> Get(Guid id)
         {
-            Projeto projeto = _projetoService.Consultar(id);
+            Projeto projeto = _unitOfWork.ProjetoRepository.Get(id);
 
             if (projeto == null)
             {
@@ -104,7 +104,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _projetoService.Incluir(obj);
+                obj = _unitOfWork.ProjetoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -162,7 +162,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _projetoService.Alterar(obj);
+                _unitOfWork.ProjetoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -197,21 +197,21 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            Projeto obj = _projetoService.Consultar(id);
+            Projeto obj = _unitOfWork.ProjetoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _projetoService.Remover(id);
+            _unitOfWork.ProjetoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _projetoService.Consultar(id) != null;
+            return _unitOfWork.ProjetoRepository.Get(id) != null;
         }
     }
 }

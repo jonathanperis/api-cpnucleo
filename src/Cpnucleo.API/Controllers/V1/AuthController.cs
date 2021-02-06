@@ -1,7 +1,7 @@
 ﻿using Cpnucleo.API.Services;
-using Cpnucleo.Infra.CrossCutting.Util.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
         private const string userT = "USERTESTE";
         private const string passT = "SENHATESTE";
 
-        private readonly ISystemConfiguration _systemConfiguration;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(ISystemConfiguration systemConfiguration)
+        public AuthController(IConfiguration configuration)
         {
-            _systemConfiguration = systemConfiguration;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -43,7 +43,10 @@ namespace Cpnucleo.API.Controllers.V1
 
             if (user == userT && pass == passT)
             {
-                token = TokenService.GenerateToken(user, _systemConfiguration.JwtKey, _systemConfiguration.JwtIssuer, _systemConfiguration.JwtExpires);
+                int jwtExpires;
+                int.TryParse(_configuration["Jwt:Expires"], out jwtExpires);
+
+                token = TokenService.GenerateToken(user, _configuration["Jwt:Key"], _configuration["Jwt:Issuer"], jwtExpires);
             }
             else
             {

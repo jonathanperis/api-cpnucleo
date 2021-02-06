@@ -1,12 +1,13 @@
 ﻿using Cpnucleo.API.Services;
-using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Infra.CrossCutting.Util.Interfaces;
 using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
+using Cpnucleo.Infra.CrossCutting.Security.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -16,13 +17,17 @@ namespace Cpnucleo.API.Controllers.V2
     [ApiVersion("2")]
     public class RecursoController : ControllerBase
     {
-        private readonly IRecursoService _recursoService;
-        private readonly ISystemConfiguration _systemConfiguration;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICryptographyManager _cryptographyManager;
+        private readonly IConfiguration _configuration;
 
-        public RecursoController(IRecursoService recursoService, ISystemConfiguration systemConfiguration)
+        public RecursoController(IUnitOfWork unitOfWork, 
+                                ICryptographyManager cryptographyManager,
+                                IConfiguration configuration)
         {
-            _recursoService = recursoService;
-            _systemConfiguration = systemConfiguration;
+            _unitOfWork = unitOfWork;
+            _cryptographyManager = cryptographyManager;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -42,7 +47,7 @@ namespace Cpnucleo.API.Controllers.V2
         [Authorize]
         public IEnumerable<Recurso> Get(bool getDependencies = false)
         {
-            return _recursoService.Listar(getDependencies);
+            return _unitOfWork.RecursoRepository.All(getDependencies);
         }
 
         /// <summary>
@@ -64,7 +69,10 @@ namespace Cpnucleo.API.Controllers.V2
         [Authorize]
         public ActionResult<Recurso> Get(Guid id)
         {
-            Recurso recurso = _recursoService.Consultar(id);
+            Recurso recurso = _unitOfWork.RecursoRepository.Get(id);
+
+            recurso.Senha = null;
+            recurso.Salt = null;
 
             if (recurso == null)
             {
@@ -112,7 +120,12 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _recursoService.Incluir(obj);
+                _cryptographyManager.CryptPbkdf2(obj.Senha, out string senhaCrypt, out string salt);
+
+                obj.Senha = senhaCrypt;
+                obj.Salt = salt;
+
+                obj = _unitOfWork.RecursoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -150,23 +163,30 @@ namespace Cpnucleo.API.Controllers.V2
         /// <response code="400">Objetos não preenchidos corretamente</response>
         /// <response code="404">Recurso não encontrado</response>
         /// <response code="500">Erro no processamento da requisição</response>
-        [HttpPost("Autenticar")]
+        [HttpPost("Auth")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<Recurso> Autenticar([FromBody]Recurso obj)
+        public ActionResult<Recurso> Auth([FromBody]Recurso obj)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            obj = _recursoService.Autenticar(obj.Login, obj.Senha, out bool valido);
+            bool valido = false;
 
-            if (obj == null)
+            Recurso recurso = _unitOfWork.RecursoRepository.GetByLogin(obj.Login);
+
+            if (recurso == null)
             {
                 return NotFound();
             }
+
+            valido = _cryptographyManager.VerifyPbkdf2(obj.Senha, recurso.Senha, recurso.Salt);
+
+            recurso.Senha = null;
+            recurso.Salt = null;
 
             if (!valido)
             {
@@ -174,9 +194,12 @@ namespace Cpnucleo.API.Controllers.V2
             }
             else
             {
-                obj.Token = TokenService.GenerateToken(obj.Id.ToString(), _systemConfiguration.JwtKey, _systemConfiguration.JwtIssuer, _systemConfiguration.JwtExpires);
+                int jwtExpires;
+                int.TryParse(_configuration["Jwt:Expires"], out jwtExpires);
 
-                return Ok(obj);
+                recurso.Token = TokenService.GenerateToken(recurso.Id.ToString(), _configuration["Jwt:Key"], _configuration["Jwt:Issuer"], jwtExpires);
+
+                return Ok(recurso);
             }
         }
 
@@ -224,7 +247,12 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _recursoService.Alterar(obj);
+                _cryptographyManager.CryptPbkdf2(obj.Senha, out string senhaCrypt, out string salt);
+
+                obj.Senha = senhaCrypt;
+                obj.Salt = salt;
+
+                _unitOfWork.RecursoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -260,21 +288,21 @@ namespace Cpnucleo.API.Controllers.V2
         [Authorize]
         public IActionResult Delete(Guid id)
         {
-            Recurso obj = _recursoService.Consultar(id);
+            Recurso obj = _unitOfWork.RecursoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _recursoService.Remover(id);
+            _unitOfWork.RecursoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _recursoService.Consultar(id) != null;
+            return _unitOfWork.RecursoRepository.Get(id) != null;
         }
     }
 }

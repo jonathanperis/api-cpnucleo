@@ -1,5 +1,5 @@
 ﻿using Cpnucleo.Domain.Entities;
-using Cpnucleo.Domain.Interfaces.Repositories;
+using Cpnucleo.Domain.Repositories;
 using Cpnucleo.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Cpnucleo.Infra.Data.Repositories
 {
-    internal class ApontamentoRepository : CrudRepository<Apontamento>, IApontamentoRepository
+    internal class ApontamentoRepository : GenericRepository<Apontamento>, IApontamentoRepository
     {
         public ApontamentoRepository(CpnucleoContext context)
             : base(context)
@@ -16,18 +16,16 @@ namespace Cpnucleo.Infra.Data.Repositories
 
         }
 
-        public IEnumerable<Apontamento> ListarPorRecurso(Guid idRecurso)
+        public IEnumerable<Apontamento> GetByRecurso(Guid idRecurso)
         {
-            return Listar()
-                .Include(_context.GetIncludePaths(typeof(Apontamento)))
+            return All(true)
                 .Where(x => x.IdRecurso == idRecurso && x.DataApontamento.Value > DateTime.Now.AddDays(-30))
                 .ToList();
         }
 
-        public int ObterTotalHorasPorRecurso(Guid idRecurso, Guid idTarefa)
+        public int GetTotalHorasPorRecurso(Guid idRecurso, Guid idTarefa)
         {
-            return Listar()
-                .Include(_context.GetIncludePaths(typeof(Apontamento)))
+            return All(true)
                 .Where(x => x.IdRecurso == idRecurso && x.IdTarefa == idTarefa)
                 .Sum(x => x.QtdHoras);
         }

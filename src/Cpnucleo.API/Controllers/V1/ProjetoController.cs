@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class ProjetoController : ControllerBase
     {
-        private readonly ICrudService<Projeto> _projetoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProjetoController(ICrudService<Projeto> projetoService)
+        public ProjetoController(IUnitOfWork unitOfWork)
         {
-            _projetoService = projetoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<Projeto> Get()
         {
-            return _projetoService.Listar();
+            return _unitOfWork.ProjetoRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<Projeto> Get(Guid id)
         {
-            Projeto projeto = _projetoService.Consultar(id);
+            Projeto projeto = _unitOfWork.ProjetoRepository.Get(id);
 
             if (projeto == null)
             {
@@ -102,7 +102,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _projetoService.Incluir(obj);
+                _unitOfWork.ProjetoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -160,7 +160,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _projetoService.Alterar(obj);
+                _unitOfWork.ProjetoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -195,21 +195,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            Projeto obj = _projetoService.Consultar(id);
+            Projeto obj = _unitOfWork.ProjetoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _projetoService.Remover(id);
+            _unitOfWork.ProjetoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _projetoService.Consultar(id) != null;
+            return _unitOfWork.ProjetoRepository.Get(id) != null;
         }
     }
 }

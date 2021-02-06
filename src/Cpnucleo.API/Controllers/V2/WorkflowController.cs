@@ -1,10 +1,10 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +15,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class WorkflowController : ControllerBase
     {
-        private readonly IWorkflowService _workflowService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public WorkflowController(IWorkflowService workflowService)
+        public WorkflowController(IUnitOfWork unitOfWork)
         {
-            _workflowService = workflowService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +38,16 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<Workflow> Get(bool getDependencies = false)
         {
-            return _workflowService.Listar(getDependencies);
+            var result = _unitOfWork.WorkflowRepository.All(getDependencies);
+
+            int colunas = _unitOfWork.WorkflowRepository.GetQuantidadeColunas();
+
+            foreach (Workflow item in result)
+            {
+                item.TamanhoColuna = _unitOfWork.WorkflowRepository.GetTamanhoColuna(colunas);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -59,12 +68,16 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Workflow> Get(Guid id)
         {
-            Workflow workflow = _workflowService.Consultar(id);
+            Workflow workflow = _unitOfWork.WorkflowRepository.Get(id);
 
             if (workflow == null)
             {
                 return NotFound();
             }
+
+            int colunas = _unitOfWork.WorkflowRepository.GetQuantidadeColunas();
+
+            workflow.TamanhoColuna = _unitOfWork.WorkflowRepository.GetTamanhoColuna(colunas);            
 
             return Ok(workflow);
         }
@@ -104,7 +117,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _workflowService.Incluir(obj);
+                obj = _unitOfWork.WorkflowRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -162,7 +175,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _workflowService.Alterar(obj);
+                _unitOfWork.WorkflowRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -197,21 +210,21 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            Workflow obj = _workflowService.Consultar(id);
+            Workflow obj = _unitOfWork.WorkflowRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _workflowService.Remover(id);
+            _unitOfWork.WorkflowRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _workflowService.Consultar(id) != null;
+            return _unitOfWork.WorkflowRepository.Get(id) != null;
         }
     }
 }

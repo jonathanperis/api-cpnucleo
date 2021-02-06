@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class ApontamentoController : ControllerBase
     {
-        private readonly IApontamentoService _apontamentoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ApontamentoController(IApontamentoService apontamentoService)
+        public ApontamentoController(IUnitOfWork unitOfWork)
         {
-            _apontamentoService = apontamentoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<Apontamento> Get()
         {
-            return _apontamentoService.Listar();
+            return _unitOfWork.ApontamentoRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<Apontamento> Get(Guid id)
         {
-            Apontamento apontamento = _apontamentoService.Consultar(id);
+            Apontamento apontamento = _unitOfWork.ApontamentoRepository.Get(id);
 
             if (apontamento == null)
             {
@@ -106,7 +106,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _apontamentoService.Incluir(obj);
+                _unitOfWork.ApontamentoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -168,7 +168,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _apontamentoService.Alterar(obj);
+                _unitOfWork.ApontamentoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -203,21 +203,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            Apontamento obj = _apontamentoService.Consultar(id);
+            Apontamento obj = _unitOfWork.ApontamentoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _apontamentoService.Remover(id);
+            _unitOfWork.ApontamentoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _apontamentoService.Consultar(id) != null;
+            return _unitOfWork.ApontamentoRepository.Get(id) != null;
         }
     }
 }

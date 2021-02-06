@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class ImpedimentoController : ControllerBase
     {
-        private readonly ICrudService<Impedimento> _impedimentoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ImpedimentoController(ICrudService<Impedimento> impedimentoService)
+        public ImpedimentoController(IUnitOfWork unitOfWork)
         {
-            _impedimentoService = impedimentoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<Impedimento> Get()
         {
-            return _impedimentoService.Listar();
+            return _unitOfWork.ImpedimentoRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<Impedimento> Get(Guid id)
         {
-            Impedimento impedimento = _impedimentoService.Consultar(id);
+            Impedimento impedimento = _unitOfWork.ImpedimentoRepository.Get(id);
 
             if (impedimento == null)
             {
@@ -101,7 +101,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _impedimentoService.Incluir(obj);
+                _unitOfWork.ImpedimentoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -158,7 +158,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _impedimentoService.Alterar(obj);
+                _unitOfWork.ImpedimentoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -193,21 +193,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            Impedimento obj = _impedimentoService.Consultar(id);
+            Impedimento obj = _unitOfWork.ImpedimentoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _impedimentoService.Remover(id);
+            _unitOfWork.ImpedimentoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _impedimentoService.Consultar(id) != null;
+            return _unitOfWork.ImpedimentoRepository.Get(id) != null;
         }
     }
 }

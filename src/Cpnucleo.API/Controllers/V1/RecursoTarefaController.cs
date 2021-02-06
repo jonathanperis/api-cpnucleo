@@ -1,5 +1,5 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
+using Cpnucleo.Domain.UoW;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class RecursoTarefaController : ControllerBase
     {
-        private readonly IRecursoTarefaService _recursoTarefaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public RecursoTarefaController(IRecursoTarefaService recursoTarefaService)
+        public RecursoTarefaController(IUnitOfWork unitOfWork)
         {
-            _recursoTarefaService = recursoTarefaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<RecursoTarefa> Get()
         {
-            return _recursoTarefaService.Listar();
+            return _unitOfWork.RecursoTarefaRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<RecursoTarefa> Get(Guid id)
         {
-            RecursoTarefa recursoTarefa = _recursoTarefaService.Consultar(id);
+            RecursoTarefa recursoTarefa = _unitOfWork.RecursoTarefaRepository.Get(id);
 
             if (recursoTarefa == null)
             {
@@ -103,7 +103,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _recursoTarefaService.Incluir(obj);
+                _unitOfWork.RecursoTarefaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -162,7 +162,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _recursoTarefaService.Alterar(obj);
+                _unitOfWork.RecursoTarefaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -197,21 +197,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            RecursoTarefa obj = _recursoTarefaService.Consultar(id);
+            RecursoTarefa obj = _unitOfWork.RecursoTarefaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _recursoTarefaService.Remover(id);
+            _unitOfWork.RecursoTarefaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _recursoTarefaService.Consultar(id) != null;
+            return _unitOfWork.RecursoTarefaRepository.Get(id) != null;
         }
     }
 }

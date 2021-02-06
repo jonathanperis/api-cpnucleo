@@ -1,10 +1,10 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +15,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class SistemaController : ControllerBase
     {
-        private readonly ICrudService<Sistema> _sistemaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public SistemaController(ICrudService<Sistema> sistemaService)
+        public SistemaController(IUnitOfWork unitOfWork)
         {
-            _sistemaService = sistemaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<Sistema> Get(bool getDependencies = false)
         {
-            return _sistemaService.Listar(getDependencies);
+            return _unitOfWork.SistemaRepository.All(getDependencies);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<Sistema> Get(Guid id)
         {
-            Sistema sistema = _sistemaService.Consultar(id);
+            Sistema sistema = _unitOfWork.SistemaRepository.Get(id);
 
             if (sistema == null)
             {
@@ -104,7 +104,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _sistemaService.Incluir(obj);
+                obj = _unitOfWork.SistemaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -162,7 +162,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _sistemaService.Alterar(obj);
+                _unitOfWork.SistemaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -197,21 +197,21 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            Sistema obj = _sistemaService.Consultar(id);
+            Sistema obj = _unitOfWork.SistemaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _sistemaService.Remover(id);
+            _unitOfWork.SistemaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _sistemaService.Consultar(id) != null;
+            return _unitOfWork.SistemaRepository.Get(id) != null;
         }
     }
 }

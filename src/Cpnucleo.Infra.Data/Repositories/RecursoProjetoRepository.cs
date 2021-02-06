@@ -1,5 +1,5 @@
 ﻿using Cpnucleo.Domain.Entities;
-using Cpnucleo.Domain.Interfaces.Repositories;
+using Cpnucleo.Domain.Repositories;
 using Cpnucleo.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Cpnucleo.Infra.Data.Repositories
 {
-    internal class RecursoProjetoRepository : CrudRepository<RecursoProjeto>, IRecursoProjetoRepository
+    internal class RecursoProjetoRepository : GenericRepository<RecursoProjeto>, IRecursoProjetoRepository
     {
         public RecursoProjetoRepository(CpnucleoContext context)
             : base(context)
@@ -16,10 +16,9 @@ namespace Cpnucleo.Infra.Data.Repositories
 
         }
 
-        public IEnumerable<RecursoProjeto> ListarPorProjeto(Guid idProjeto)
+        public IEnumerable<RecursoProjeto> GetByProjeto(Guid idProjeto)
         {
-            return Listar()
-                .Include(_context.GetIncludePaths(typeof(RecursoProjeto)))
+            return All(true)
                 .Where(x => x.IdProjeto == idProjeto)
                 .ToList();
         }

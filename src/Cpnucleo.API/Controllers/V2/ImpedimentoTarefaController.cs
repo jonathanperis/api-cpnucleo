@@ -1,10 +1,10 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +15,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class ImpedimentoTarefaController : ControllerBase
     {
-        private readonly IImpedimentoTarefaService _impedimentoTarefaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ImpedimentoTarefaController(IImpedimentoTarefaService impedimentoTarefaService)
+        public ImpedimentoTarefaController(IUnitOfWork unitOfWork)
         {
-            _impedimentoTarefaService = impedimentoTarefaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<ImpedimentoTarefa> Get(bool getDependencies = false)
         {
-            return _impedimentoTarefaService.Listar(getDependencies);
+            return _unitOfWork.ImpedimentoTarefaRepository.All(getDependencies);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<ImpedimentoTarefa> GetByTarefa(Guid idTarefa)
         {
-            return _impedimentoTarefaService.ListarPorTarefa(idTarefa);
+            return _unitOfWork.ImpedimentoTarefaRepository.GetByTarefa(idTarefa);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<ImpedimentoTarefa> Get(Guid id)
         {
-            ImpedimentoTarefa impedimentoTarefa = _impedimentoTarefaService.Consultar(id);
+            ImpedimentoTarefa impedimentoTarefa = _unitOfWork.ImpedimentoTarefaRepository.Get(id);
 
             if (impedimentoTarefa == null)
             {
@@ -124,7 +124,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _impedimentoTarefaService.Incluir(obj);
+                obj = _unitOfWork.ImpedimentoTarefaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -183,7 +183,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _impedimentoTarefaService.Alterar(obj);
+                _unitOfWork.ImpedimentoTarefaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -218,21 +218,21 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            ImpedimentoTarefa obj = _impedimentoTarefaService.Consultar(id);
+            ImpedimentoTarefa obj = _unitOfWork.ImpedimentoTarefaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _impedimentoTarefaService.Remover(id);
+            _unitOfWork.ImpedimentoTarefaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _impedimentoTarefaService.Consultar(id) != null;
+            return _unitOfWork.ImpedimentoTarefaRepository.Get(id) != null;
         }
     }
 }

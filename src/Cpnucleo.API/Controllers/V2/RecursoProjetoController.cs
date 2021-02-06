@@ -1,10 +1,10 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +15,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class RecursoProjetoController : ControllerBase
     {
-        private readonly IRecursoProjetoService _recursoProjetoService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public RecursoProjetoController(IRecursoProjetoService recursoProjetoService)
+        public RecursoProjetoController(IUnitOfWork unitOfWork)
         {
-            _recursoProjetoService = recursoProjetoService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<RecursoProjeto> Get(bool getDependencies = false)
         {
-            return _recursoProjetoService.Listar(getDependencies);
+            return _unitOfWork.RecursoProjetoRepository.All(getDependencies);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<RecursoProjeto> GetByProjeto(Guid idRecurso)
         {
-            return _recursoProjetoService.ListarPorProjeto(idRecurso);
+            return _unitOfWork.RecursoProjetoRepository.GetByProjeto(idRecurso);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<RecursoProjeto> Get(Guid id)
         {
-            RecursoProjeto recursoProjeto = _recursoProjetoService.Consultar(id);
+            RecursoProjeto recursoProjeto = _unitOfWork.RecursoProjetoRepository.Get(id);
 
             if (recursoProjeto == null)
             {
@@ -123,7 +123,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _recursoProjetoService.Incluir(obj);
+                obj = _unitOfWork.RecursoProjetoRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -181,7 +181,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _recursoProjetoService.Alterar(obj);
+                _unitOfWork.RecursoProjetoRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -216,21 +216,21 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            RecursoProjeto obj = _recursoProjetoService.Consultar(id);
+            RecursoProjeto obj = _unitOfWork.RecursoProjetoRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _recursoProjetoService.Remover(id);
+            _unitOfWork.RecursoProjetoRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _recursoProjetoService.Consultar(id) != null;
+            return _unitOfWork.RecursoProjetoRepository.Get(id) != null;
         }
     }
 }

@@ -1,10 +1,10 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V2
 {
@@ -15,11 +15,11 @@ namespace Cpnucleo.API.Controllers.V2
     [Authorize]
     public class RecursoTarefaController : ControllerBase
     {
-        private readonly IRecursoTarefaService _recursoTarefaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public RecursoTarefaController(IRecursoTarefaService recursoTarefaService)
+        public RecursoTarefaController(IUnitOfWork unitOfWork)
         {
-            _recursoTarefaService = recursoTarefaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<RecursoTarefa> Get(bool getDependencies = false)
         {
-            return _recursoTarefaService.Listar(getDependencies);
+            return _unitOfWork.RecursoTarefaRepository.All(getDependencies);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IEnumerable<RecursoTarefa> GetByTarefa(Guid idTarefa)
         {
-            return _recursoTarefaService.ListarPorTarefa(idTarefa);
+            return _unitOfWork.RecursoTarefaRepository.ListarPorTarefa(idTarefa);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<RecursoTarefa> Get(Guid id)
         {
-            RecursoTarefa recursoTarefa = _recursoTarefaService.Consultar(id);
+            RecursoTarefa recursoTarefa = _unitOfWork.RecursoTarefaRepository.Get(id);
 
             if (recursoTarefa == null)
             {
@@ -124,7 +124,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                obj.Id = _recursoTarefaService.Incluir(obj);
+                obj = _unitOfWork.RecursoTarefaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -183,7 +183,7 @@ namespace Cpnucleo.API.Controllers.V2
 
             try
             {
-                _recursoTarefaService.Alterar(obj);
+                _unitOfWork.RecursoTarefaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -218,21 +218,21 @@ namespace Cpnucleo.API.Controllers.V2
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult Delete(Guid id)
         {
-            RecursoTarefa obj = _recursoTarefaService.Consultar(id);
+            RecursoTarefa obj = _unitOfWork.RecursoTarefaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _recursoTarefaService.Remover(id);
+            _unitOfWork.RecursoTarefaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _recursoTarefaService.Consultar(id) != null;
+            return _unitOfWork.RecursoTarefaRepository.Get(id) != null;
         }
     }
 }

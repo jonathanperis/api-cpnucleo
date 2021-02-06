@@ -1,14 +1,14 @@
-﻿using Cpnucleo.Infra.CrossCutting.Util.Interfaces;
-using Cpnucleo.Infra.Data.Mappings;
+﻿using Cpnucleo.Infra.Data.Mappings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Cpnucleo.Infra.Data.Context
 {
     internal class CpnucleoContext : DbContext
     {
-        private readonly ISystemConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
-        public CpnucleoContext(ISystemConfiguration configuration)
+        public CpnucleoContext(IConfiguration configuration)
         {
             _configuration = configuration;
         }
@@ -33,7 +33,7 @@ namespace Cpnucleo.Infra.Data.Context
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseSqlServer(_configuration.ConnectionString)
+                .UseSqlServer(_configuration.GetConnectionString("DefaultConnection"))
                 .EnableSensitiveDataLogging();
         }
     }

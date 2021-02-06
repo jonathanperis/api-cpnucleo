@@ -1,5 +1,5 @@
 ﻿using Cpnucleo.Domain.Entities;
-using Cpnucleo.Domain.Interfaces.Repositories;
+using Cpnucleo.Domain.Repositories;
 using Cpnucleo.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Cpnucleo.Infra.Data.Repositories
 {
-    internal class RecursoTarefaRepository : CrudRepository<RecursoTarefa>, IRecursoTarefaRepository
+    internal class RecursoTarefaRepository : GenericRepository<RecursoTarefa>, IRecursoTarefaRepository
     {
         public RecursoTarefaRepository(CpnucleoContext context)
             : base(context)
@@ -18,8 +18,7 @@ namespace Cpnucleo.Infra.Data.Repositories
 
         public IEnumerable<RecursoTarefa> ListarPorTarefa(Guid idTarefa)
         {
-            return Listar()
-                .Include(_context.GetIncludePaths(typeof(RecursoTarefa)))
+            return All(true)
                 .Where(x => x.IdTarefa == idTarefa)
                 .ToList();
         }

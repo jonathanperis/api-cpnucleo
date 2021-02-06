@@ -1,6 +1,5 @@
 ﻿using Cpnucleo.Domain.Configuration;
 using Cpnucleo.Infra.CrossCutting.Security.Configuration;
-using Cpnucleo.Infra.CrossCutting.Util.Configuration;
 using Cpnucleo.Infra.Data.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +12,6 @@ namespace Cpnucleo.Infra.CrossCutting.IoC
             services.AddDomainSetup();
             services.AddInfraDataSetup();
             services.AddInfraCrossCuttingSecutirySetup();
-            services.AddInfraCrossCuttingUtilSetup();
 
             return services;
         }

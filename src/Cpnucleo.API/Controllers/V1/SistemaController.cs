@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class SistemaController : ControllerBase
     {
-        private readonly ICrudService<Sistema> _sistemaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public SistemaController(ICrudService<Sistema> sistemaService)
+        public SistemaController(IUnitOfWork unitOfWork)
         {
-            _sistemaService = sistemaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<Sistema> Get()
         {
-            return _sistemaService.Listar();
+            return _unitOfWork.SistemaRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<Sistema> Get(Guid id)
         {
-            Sistema sistema = _sistemaService.Consultar(id);
+            Sistema sistema = _unitOfWork.SistemaRepository.Get(id);
 
             if (sistema == null)
             {
@@ -102,7 +102,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _sistemaService.Incluir(obj);
+                _unitOfWork.SistemaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -160,7 +160,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _sistemaService.Alterar(obj);
+                _unitOfWork.SistemaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -195,21 +195,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            Sistema obj = _sistemaService.Consultar(id);
+            Sistema obj = _unitOfWork.SistemaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _sistemaService.Remover(id);
+            _unitOfWork.SistemaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _sistemaService.Consultar(id) != null;
+            return _unitOfWork.SistemaRepository.Get(id) != null;
         }
     }
 }

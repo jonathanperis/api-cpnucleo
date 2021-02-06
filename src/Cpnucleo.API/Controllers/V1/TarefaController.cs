@@ -1,9 +1,9 @@
-﻿using Cpnucleo.Domain.Interfaces.Services;
-using Cpnucleo.Domain.Entities;
+﻿using Cpnucleo.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using Cpnucleo.Domain.UoW;
 
 namespace Cpnucleo.API.Controllers.V1
 {
@@ -14,11 +14,11 @@ namespace Cpnucleo.API.Controllers.V1
     [Authorize]
     public class TarefaController : ControllerBase
     {
-        private readonly ITarefaService _tarefaService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TarefaController(ITarefaService tarefaService)
+        public TarefaController(IUnitOfWork unitOfWork)
         {
-            _tarefaService = tarefaService;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(200)]
         public IEnumerable<Tarefa> Get()
         {
-            return _tarefaService.Listar();
+            return _unitOfWork.TarefaRepository.All();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public ActionResult<Tarefa> Get(Guid id)
         {
-            Tarefa tarefa = _tarefaService.Consultar(id);
+            Tarefa tarefa = _unitOfWork.TarefaRepository.Get(id);
 
             if (tarefa == null)
             {
@@ -108,7 +108,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _tarefaService.Incluir(obj);
+                _unitOfWork.TarefaRepository.Add(obj);
             }
             catch (Exception)
             {
@@ -172,7 +172,7 @@ namespace Cpnucleo.API.Controllers.V1
 
             try
             {
-                _tarefaService.Alterar(obj);
+                _unitOfWork.TarefaRepository.Update(obj);
             }
             catch (Exception)
             {
@@ -207,21 +207,21 @@ namespace Cpnucleo.API.Controllers.V1
         [ProducesResponseType(404)]
         public IActionResult Delete(Guid id)
         {
-            Tarefa obj = _tarefaService.Consultar(id);
+            Tarefa obj = _unitOfWork.TarefaRepository.Get(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            _tarefaService.Remover(id);
+            _unitOfWork.TarefaRepository.Remove(id);
 
             return NoContent();
         }
 
         private bool ObjExists(Guid id)
         {
-            return _tarefaService.Consultar(id) != null;
+            return _unitOfWork.TarefaRepository.Get(id) != null;
         }
     }
 }

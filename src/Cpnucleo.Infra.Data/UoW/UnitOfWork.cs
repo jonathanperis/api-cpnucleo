@@ -1,5 +1,6 @@
 ﻿using Cpnucleo.Domain.Entities;
-using Cpnucleo.Domain.Interfaces.Repositories;
+using Cpnucleo.Domain.Repositories;
+using Cpnucleo.Domain.UoW;
 using Cpnucleo.Infra.Data.Context;
 using Cpnucleo.Infra.Data.Repositories;
 using System;
@@ -16,16 +17,16 @@ namespace Cpnucleo.Infra.Data.UoW
         }
 
         private IApontamentoRepository _apontamentoRepository;
-        private ICrudRepository<Impedimento> _impedimentoRepository;
+        private IGenericRepository<Impedimento> _impedimentoRepository;
         private IImpedimentoTarefaRepository _impedimentoTarefaRepository;
-        private ICrudRepository<Projeto> _projetoRepository;
+        private IGenericRepository<Projeto> _projetoRepository;
         private IRecursoRepository _recursoRepository;
         private IRecursoProjetoRepository _recursoProjetoRepository;
         private IRecursoTarefaRepository _recursoTarefaRepository;
-        private ICrudRepository<Sistema> _sistemaRepository;
+        private IGenericRepository<Sistema> _sistemaRepository;
         private ITarefaRepository _tarefaRepository;
-        private ICrudRepository<TipoTarefa> _tipoTarefaRepository;
-        private ICrudRepository<Workflow> _workflowRepository;
+        private IGenericRepository<TipoTarefa> _tipoTarefaRepository;
+        private IWorkflowRepository _workflowRepository;
 
         public IApontamentoRepository ApontamentoRepository
         {
@@ -38,12 +39,12 @@ namespace Cpnucleo.Infra.Data.UoW
             }
         }
 
-        public ICrudRepository<Impedimento> ImpedimentoRepository
+        public IGenericRepository<Impedimento> ImpedimentoRepository
         {
             get
             {
                 if (_impedimentoRepository == null)
-                    _impedimentoRepository = new CrudRepository<Impedimento>(_context);
+                    _impedimentoRepository = new GenericRepository<Impedimento>(_context);
 
                 return _impedimentoRepository;
             }
@@ -60,12 +61,12 @@ namespace Cpnucleo.Infra.Data.UoW
             }
         }
 
-        public ICrudRepository<Projeto> ProjetoRepository
+        public IGenericRepository<Projeto> ProjetoRepository
         {
             get
             {
                 if (_projetoRepository == null)
-                    _projetoRepository = new CrudRepository<Projeto>(_context);
+                    _projetoRepository = new GenericRepository<Projeto>(_context);
 
                 return _projetoRepository;
             }
@@ -104,12 +105,12 @@ namespace Cpnucleo.Infra.Data.UoW
             }
         }     
 
-        public ICrudRepository<Sistema> SistemaRepository
+        public IGenericRepository<Sistema> SistemaRepository
         {
             get
             {
                 if (_sistemaRepository == null)
-                    _sistemaRepository = new CrudRepository<Sistema>(_context);
+                    _sistemaRepository = new GenericRepository<Sistema>(_context);
 
                 return _sistemaRepository;
             }
@@ -126,29 +127,29 @@ namespace Cpnucleo.Infra.Data.UoW
             }
         }           
 
-        public ICrudRepository<TipoTarefa> TipoTarefaRepository
+        public IGenericRepository<TipoTarefa> TipoTarefaRepository
         {
             get
             {
                 if (_tipoTarefaRepository == null)
-                    _tipoTarefaRepository = new CrudRepository<TipoTarefa>(_context);
+                    _tipoTarefaRepository = new GenericRepository<TipoTarefa>(_context);
 
                 return _tipoTarefaRepository;
             }
         }
 
-        public ICrudRepository<Workflow> WorkflowRepository
+        public IWorkflowRepository WorkflowRepository
         {
             get
             {
                 if (_workflowRepository == null)
-                    _workflowRepository = new CrudRepository<Workflow>(_context);
+                    _workflowRepository = new WorkflowRepository(_context);
 
                 return _workflowRepository;
             }
         }
         
-        public bool Commit()
+        public bool SaveChanges()
         {
             return _context.SaveChanges() > 0;
         }
